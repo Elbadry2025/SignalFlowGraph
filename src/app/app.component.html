@@ -3,7 +3,20 @@
     <button class="circleButton" (click)="drawNode()"><i class="fa-solid fa-circle" style="color: red
     ;"></i> <p>Add Node</p> </button>
     <button class="LineButton" (click)="connect()"><i class="fa-solid fa-arrow-right" style="color: white;"></i> <p>Connect Nodes</p></button>
-    
   </div>
   <div id="konva-holder" class="main" (mousedown)="MouseDownHandler()"></div>
+
+  <div class="light-blocker" id = "light-blocker"></div>
+
+  <div class="popup" id="popup">
+
+    <div class="enter-gain-div">
+      <span>Enter gain:</span>
+      <input type="text" id="gainField"/>
+    </div>
+
+    <button id = "enter-gain-button" (click)="takeGain()">Enter</button>
+
+  </div>
+
 </div>

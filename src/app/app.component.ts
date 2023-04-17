@@ -71,57 +71,11 @@ export class AppComponent implements OnInit {
         if(this.NodeOneSelected){
           this.NodeOneSelected = false;
           this.node2 = e.target;
-          var x1 = this.node1.x();
-          var x2 = this.node2.x();
-          var y1 = this.node1.y();
-          var y2 = this.node2.y();
-          var factorx = 0;
-          var factory = 0;
-          var controlX = 0;
-          var controlY = 0;
-          var isFeedBack:boolean = false;
-          if(x2 > x1){
-            x1 += 30;
-            x2 -= 30;
-            controlX = x1;
-            controlY = y1;
-          }else if(x2 == x1 && y2 == y1){
-            controlX = x1;
-            controlY = y1+75;
-            x1 -= 30;
-            x2 += 30;
-          }else{
-            y1+= 30;
-            y2+= 30;
-            controlX = (x1+x2)/2;
-            controlY = y2 + 60;
-            isFeedBack = true;
-          }
-          var line = new Konva.Arrow({
-            points: [x1, y1, controlX, controlY, x2, y2],
-            tension: 1,
-            stroke: 'black',
-            strokeWidth: 2,
-          });
-          var Xgain = (x1+x2) / 2;
-          var Ygain = this.stage.getPointerPosition()?.y as number -10;
-          if(isFeedBack){
-            Ygain += 100;
-          }
-          const label = new Konva.Text({
-            x : Xgain,
-            y : Ygain,
-            text: "60",
-            fontSize: 20,
-            fill: 'black',
-          });
-          const group = new Konva.Group;
-          group.add(line);
-          group.add(label);
-          this.layer.add(group).batchDraw;
-          this.stage.add(this.layer);
-          let srcNode = this.myMap.get(this.node1.x() as Number) as String;
-          let destNode = this.myMap.get(this.node2.x() as Number) as String;
+         
+          (<HTMLDivElement>document.getElementById("light-blocker")).style.display = 'block';
+          (<HTMLDivElement>document.getElementById("popup")).style.display = 'flex';
+          (<HTMLDivElement>document.getElementById("popup")).style.flexDirection = 'row';
+          (<HTMLDivElement>document.getElementById("popup")).style.justifyContent = 'space-between';
           this.connecting = false;
         }else{
           this.node1 = e.target;
@@ -138,5 +92,65 @@ export class AppComponent implements OnInit {
   connect(){
     this.connecting = true;
   }
+
+  drawLine(gain:Number){
+    var x1 = this.node1.x();
+    var x2 = this.node2.x();
+    var y1 = this.node1.y();
+    var y2 = this.node2.y();
+    var controlX = 0;
+    var controlY = 0;
+    var isFeedBack:boolean = false;
+    if(x2 > x1){
+      x1 += 30;
+      x2 -= 30;
+      controlX = x1;
+      controlY = y1;
+    }else if(x2 == x1 && y2 == y1){
+      controlX = x1;
+      controlY = y1+75;
+      x1 -= 30;
+      x2 += 30;
+    }else{
+      y1+= 30;
+      y2+= 30;
+      controlX = (x1+x2)/2;
+      controlY = y2 + 60;
+      isFeedBack = true;
+    }
+
+    var line = new Konva.Arrow({
+      points: [x1, y1, controlX, controlY, x2, y2],
+      tension: 1,
+      stroke: 'black',
+      strokeWidth: 2,
+    });
+    var Xgain = (x1+x2) / 2;
+    var Ygain = this.stage.getPointerPosition()?.y as number -10;
+    if(isFeedBack){
+      Ygain += 100;
+    }
+    const label = new Konva.Text({
+      x : Xgain,
+      y : Ygain,
+      text: String(gain),
+      fontSize: 20,
+      fill: 'black',
+    });
+    const group = new Konva.Group;
+    group.add(line);
+    group.add(label);
+    this.layer.add(group).batchDraw;
+    this.stage.add(this.layer);
+    let srcNode = this.myMap.get(this.node1.x() as Number) as String;
+    let destNode = this.myMap.get(this.node2.x() as Number) as String;
+  }
   
+  takeGain(){
+    let gain = (<HTMLInputElement>document.getElementById("gainField")).value;
+    (<HTMLDivElement>document.getElementById("light-blocker")).style.display = 'none';
+    (<HTMLDivElement>document.getElementById("popup")).style.display = 'none';
+    this.drawLine(Number(gain));
+  }
+
 }
