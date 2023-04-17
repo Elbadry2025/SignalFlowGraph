@@ -17,6 +17,7 @@ export class AppComponent implements OnInit {
   connecting:boolean = false;
   node1!: Konva.Shape;
   node2!: Konva.Shape;
+  myMap = new Map<Number, String>();
   NodeOneSelected: boolean = false;
   insertNode: boolean = false;
   ngOnInit(): void {
@@ -26,10 +27,8 @@ export class AppComponent implements OnInit {
       width: 1600,
       container: "konva-holder"
     });
-  
     this.layer = new Konva.Layer;
     this.stage.add(this.layer);
-    
   }
   drawNode(){
     this.insertNode = true;
@@ -43,14 +42,18 @@ export class AppComponent implements OnInit {
       stroke: 'black',
       strokeWidth: 4,
     });
+    let Str:String = String.fromCharCode(65+this.shapes.length);
+    let key:Number = this.stage.getPointerPosition()?.x as number;
     const label = new Konva.Text({
       x : this.stage.getPointerPosition()?.x as number -10,
       y : this.stage.getPointerPosition()?.y as number -10,
       text: String.fromCharCode(65+this.shapes.length),
       fontSize: 20,
       fill: 'white',
-
     });
+    this.myMap.set(key,Str);
+    console.log(this.myMap);
+    console.log(circle);
     const group = new Konva.Group;
     group.add(circle);
     group.add(label);
@@ -76,14 +79,7 @@ export class AppComponent implements OnInit {
           var factory = 0;
           var controlX = 0;
           var controlY = 0;
-          /*if(Math.abs(x1-x2)<20){
-              x1-=30;
-              factory = Math.abs(y2-y1)/120;
-              controlY = (y1+y2)/2-factory;
-            }else{
-              factorx= Math.abs(x2-x1)/120;
-              controlX = (x1+x2)/2-factorx
-            }*/
+          var isFeedBack:boolean = false;
           if(x2 > x1){
             x1 += 30;
             x2 -= 30;
@@ -99,6 +95,7 @@ export class AppComponent implements OnInit {
             y2+= 30;
             controlX = (x1+x2)/2;
             controlY = y2 + 60;
+            isFeedBack = true;
           }
           var line = new Konva.Arrow({
             points: [x1, y1, controlX, controlY, x2, y2],
@@ -106,8 +103,25 @@ export class AppComponent implements OnInit {
             stroke: 'black',
             strokeWidth: 2,
           });
-          this.layer.add(line).batchDraw;
+          var Xgain = (x1+x2) / 2;
+          var Ygain = this.stage.getPointerPosition()?.y as number -10;
+          if(isFeedBack){
+            Ygain += 100;
+          }
+          const label = new Konva.Text({
+            x : Xgain,
+            y : Ygain,
+            text: "60",
+            fontSize: 20,
+            fill: 'black',
+          });
+          const group = new Konva.Group;
+          group.add(line);
+          group.add(label);
+          this.layer.add(group).batchDraw;
           this.stage.add(this.layer);
+          let srcNode = this.myMap.get(this.node1.x() as Number) as String;
+          let destNode = this.myMap.get(this.node2.x() as Number) as String;
           this.connecting = false;
         }else{
           this.node1 = e.target;
@@ -124,6 +138,5 @@ export class AppComponent implements OnInit {
   connect(){
     this.connecting = true;
   }
-
   
 }
