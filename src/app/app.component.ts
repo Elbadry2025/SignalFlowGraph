@@ -17,8 +17,8 @@ export class AppComponent implements OnInit {
   connecting:boolean = false;
   node1!: Konva.Shape;
   node2!: Konva.Shape;
-  myMap = new Map<Number, String>();
-  map2 = new Map<String, Number>();
+  xToNodeMap = new Map<Number, String>();
+  letterToIndex = new Map<String, Number>();
   graph: Number[][] =[[0]];
   NodeOneSelected: boolean = false;
   insertNode: boolean = false;
@@ -55,9 +55,9 @@ export class AppComponent implements OnInit {
       fontSize: 20,
       fill: 'white',
     });
-    this.myMap.set(key,Str);
-    this.map2.set(Str, Str.charCodeAt(0) -65);
-    console.log(this.myMap);
+    this.xToNodeMap.set(key,Str);
+    this.letterToIndex.set(Str, Str.charCodeAt(0) -65);
+    console.log(this.xToNodeMap);
     console.log(circle);
     const group = new Konva.Group;
     group.add(circle);
@@ -158,10 +158,10 @@ export class AppComponent implements OnInit {
     group.add(label);
     this.layer.add(group).batchDraw;
     this.stage.add(this.layer);
-    let srcNode = this.myMap.get(this.node1.x() as Number) as String;
-    let destNode = this.myMap.get(this.node2.x() as Number) as String;
-    let srcNum = this.map2.get(srcNode) as number;
-    let destNum = this.map2.get(destNode) as number;
+    let srcNode = this.xToNodeMap.get(this.node1.x() as Number) as String;
+    let destNode = this.xToNodeMap.get(this.node2.x() as Number) as String;
+    let srcNum = this.letterToIndex.get(srcNode) as number;
+    let destNum = this.letterToIndex.get(destNode) as number;
     this.graph[srcNum][destNum] = gain;
     for (let i = 0; i < this.graph.length; i++) {
       for (let j = 0; j < this.graph.length; j++) {
@@ -174,7 +174,6 @@ export class AppComponent implements OnInit {
     let gain = (<HTMLInputElement>document.getElementById("gainField")).value;
     (<HTMLDivElement>document.getElementById("light-blocker")).style.display = 'none';
     (<HTMLDivElement>document.getElementById("popup")).style.display = 'none';
-    this.drawLine(Number(gain));
     if(Number(gain) == 0)this.drawLine(1);
     else this.drawLine(Number(gain));
   }
