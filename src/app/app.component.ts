@@ -62,6 +62,7 @@ export class AppComponent implements OnInit {
   }
 
   MouseDownHandler(){
+    console.log("HIII");
     this.stage.on("click", (e) => {
       if(e.target instanceof Konva.Circle && this.conneting && !this.insertNode){
         if(this.NodeOneSelected){
@@ -84,29 +85,8 @@ export class AppComponent implements OnInit {
             tension: 1,
             stroke: 'black',
             strokeWidth: 2,
-
-          
         });
         this.layer.add(line).batchDraw;
-// const dx = this.node2.x() - this.node1.x();
-// const dy = this.node2.y() - this.node1.y();
-
-// const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-// const length = Math.sqrt(dx * dx + dy * dy);
-
-// const arc = new Konva.Arc({
-//   x: this.node1.x()+30,
-//   y: this.node1.y(),
-//   innerRadius: length/4,
-//   outerRadius: length/2,
-//   angle: angle,
-//   fill: 'red',
-//   stroke: 'black',
-//   strokeWidth: 2,
-  
-// });
-// this.layer.add(arc);
-
         this.stage.add(this.layer);
         this.conneting = false;
         }else{
