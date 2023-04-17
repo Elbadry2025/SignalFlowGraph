@@ -18,8 +18,11 @@ export class AppComponent implements OnInit {
   node1!: Konva.Shape;
   node2!: Konva.Shape;
   myMap = new Map<Number, String>();
+  map2 = new Map<String, Number>();
+  graph: Number[][] =[[0]];
   NodeOneSelected: boolean = false;
   insertNode: boolean = false;
+  count: number = 0;
   ngOnInit(): void {
     document.documentElement.style.setProperty('--wbCursor', "crosshair");
     this.stage = new Konva.Stage({
@@ -34,6 +37,7 @@ export class AppComponent implements OnInit {
     this.insertNode = true;
   }
   Circle(){
+    this.count++;
     const circle = new Konva.Circle({
       x : this.stage.getPointerPosition()?.x,
       y : this.stage.getPointerPosition()?.y,
@@ -52,6 +56,7 @@ export class AppComponent implements OnInit {
       fill: 'white',
     });
     this.myMap.set(key,Str);
+    this.map2.set(Str, Str.charCodeAt(0) -65);
     console.log(this.myMap);
     console.log(circle);
     const group = new Konva.Group;
@@ -61,7 +66,18 @@ export class AppComponent implements OnInit {
     this.layer.add(group).batchDraw;
     this.shapes.push(group);
     this.stage.add(this.layer);
+    while (this.graph.length < this.count) {
+      this.graph.push(Array(this.graph[0].length).fill(0));
+    }
     
+    // Add new columns to the array as needed
+    while (this.graph[0].length < this.count) {
+      for (let i = 0; i < this.graph.length; i++) {
+        if (this.graph[i][this.graph[0].length] === undefined) {
+          this.graph[i].push(0);
+        }
+      }
+    }
   }
 
   MouseDownHandler(){
@@ -144,6 +160,14 @@ export class AppComponent implements OnInit {
     this.stage.add(this.layer);
     let srcNode = this.myMap.get(this.node1.x() as Number) as String;
     let destNode = this.myMap.get(this.node2.x() as Number) as String;
+    let srcNum = this.map2.get(srcNode) as number;
+    let destNum = this.map2.get(destNode) as number;
+    this.graph[srcNum][destNum] = gain;
+    for (let i = 0; i < this.graph.length; i++) {
+      for (let j = 0; j < this.graph.length; j++) {
+        console.log(this.graph[i][j]);
+      }
+    }
   }
   
   takeGain(){
@@ -151,6 +175,8 @@ export class AppComponent implements OnInit {
     (<HTMLDivElement>document.getElementById("light-blocker")).style.display = 'none';
     (<HTMLDivElement>document.getElementById("popup")).style.display = 'none';
     this.drawLine(Number(gain));
+    if(Number(gain) == 0)this.drawLine(1);
+    else this.drawLine(Number(gain));
   }
 
 }
