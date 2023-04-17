@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
   x!: number;
   y!: number;
   shapes: Konva.Group[] = [];
-  conneting:boolean = false;
+  connecting:boolean = false;
   node1!: Konva.Shape;
   node2!: Konva.Shape;
   NodeOneSelected: boolean = false;
@@ -64,7 +64,7 @@ export class AppComponent implements OnInit {
   MouseDownHandler(){
     console.log("HIII");
     this.stage.on("click", (e) => {
-      if(e.target instanceof Konva.Circle && this.conneting && !this.insertNode){
+      if(e.target instanceof Konva.Circle && this.connecting && !this.insertNode){
         if(this.NodeOneSelected){
           this.NodeOneSelected = false;
           this.node2 = e.target;
@@ -74,25 +74,45 @@ export class AppComponent implements OnInit {
           var y2 = this.node2.y();
           var factorx = 0;
           var factory = 0;
-          if(Math.abs(x1-x2)<20){
-            x1-=30;
-            factory = Math.abs(y2-y1)/6;
+          var controlX = 0;
+          var controlY = 0;
+          /*if(Math.abs(x1-x2)<20){
+              x1-=30;
+              factory = Math.abs(y2-y1)/120;
+              controlY = (y1+y2)/2-factory;
+            }else{
+              factorx= Math.abs(x2-x1)/120;
+              controlX = (x1+x2)/2-factorx
+            }*/
+          if(x2 > x1){
+            x1 += 30;
+            x2 -= 30;
+            controlX = x1;
+            controlY = y1;
+          }else if(x2 == x1 && y2 == y1){
+            controlX = x1;
+            controlY = y1+75;
+            x1 -= 30;
+            x2 += 30;
           }else{
-            factorx= Math.abs(x2-x1)/6;
+            y1+= 30;
+            y2+= 30;
+            controlX = (x1+x2)/2;
+            controlY = y2 + 60;
           }
-          var line = new Konva.Line({
-            points: [x1,y1,(x1+x2)/2-factorx,(y1+y2)/2-factory,x2,y2],
+          var line = new Konva.Arrow({
+            points: [x1, y1, controlX, controlY, x2, y2],
             tension: 1,
             stroke: 'black',
             strokeWidth: 2,
-        });
-        this.layer.add(line).batchDraw;
-        this.stage.add(this.layer);
-        this.conneting = false;
+          });
+          this.layer.add(line).batchDraw;
+          this.stage.add(this.layer);
+          this.connecting = false;
         }else{
           this.node1 = e.target;
           this.NodeOneSelected = true;
-          this.conneting = false;
+          this.connecting = false;
         }
       }else if(this.insertNode){
         this.Circle();
@@ -101,9 +121,9 @@ export class AppComponent implements OnInit {
     })
   }
 
-connect(){
-  this.conneting = true;
-}
+  connect(){
+    this.connecting = true;
+  }
 
   
 }
