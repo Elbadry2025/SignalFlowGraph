@@ -163,12 +163,13 @@ export class AppComponent implements OnInit {
     let destNode = this.xToNodeMap.get(this.node2.x() as Number) as String;
     let srcNum = this.letterToIndex.get(srcNode) as number;
     let destNum = this.letterToIndex.get(destNode) as number;
-    this.graph[srcNum][destNum] = gain;
-    // for (let i = 0; i < this.graph.length; i++) {
-    //   for (let j = 0; j < this.graph.length; j++) {
-    //     console.log(this.graph[i][j]);
-    //   }
-    // }
+
+    if(this.graph[srcNum][destNum] != 0) //if edge already exists then sum up the gains (summation point)
+      this.graph[srcNum][destNum] = this.graph[srcNum][destNum].valueOf() + gain.valueOf();
+    else
+      this.graph[srcNum][destNum] = gain;
+    
+    console.log(this.graph);
   }
   
   takeGain(){
