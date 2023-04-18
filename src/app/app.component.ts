@@ -81,7 +81,6 @@ export class AppComponent implements OnInit {
   }
 
   MouseDownHandler(){
-    console.log("HIII");
     this.stage.on("click", (e) => {
       if(e.target instanceof Konva.Circle && this.connecting && !this.insertNode){
         if(this.NodeOneSelected){
@@ -117,7 +116,9 @@ export class AppComponent implements OnInit {
     var controlX = 0;
     var controlY = 0;
     var isFeedBack:boolean = false;
-    if(x2 > x1){
+    var index1:Number = Number(this.letterToIndex.get(String(this.xToNodeMap.get(this.node1.x()))));
+    var index2:Number = Number(this.letterToIndex.get(String(this.xToNodeMap.get(this.node2.x()))));
+    if(x2 > x1 && this.graph[Number(index1)][Number(index2)] == 0 && Math.abs(Number(index1)-Number(index2)) <= 1){
       x1 += 30;
       x2 -= 30;
       controlX = x1;
@@ -163,11 +164,11 @@ export class AppComponent implements OnInit {
     let srcNum = this.letterToIndex.get(srcNode) as number;
     let destNum = this.letterToIndex.get(destNode) as number;
     this.graph[srcNum][destNum] = gain;
-    for (let i = 0; i < this.graph.length; i++) {
-      for (let j = 0; j < this.graph.length; j++) {
-        console.log(this.graph[i][j]);
-      }
-    }
+    // for (let i = 0; i < this.graph.length; i++) {
+    //   for (let j = 0; j < this.graph.length; j++) {
+    //     console.log(this.graph[i][j]);
+    //   }
+    // }
   }
   
   takeGain(){
@@ -177,5 +178,46 @@ export class AppComponent implements OnInit {
     if(Number(gain) == 0)this.drawLine(1);
     else this.drawLine(Number(gain));
   }
+
+  //-----------solve part---------------------------
+  startNode:String = "";
+  endNode:String = "";
+  farwardPaths: string[] = [];
+  visitedSet = new Set<String>();
+
+  solve(){
+    if(this.graph.length==0)return;
+    this.getFarwardPaths();
+
+  }
+  getFarwardPaths(){
+    //i supposed that the source node is A and the dest is the furthest letter
+    this.startNode = String.fromCharCode(65+0);
+    this.endNode = String.fromCharCode(65+this.graph.length-1);
+    console.log(this.startNode);
+    console.log(this.endNode);
+    this.getFarwardPathsRecursively(String(this.startNode),"");
+    console.log("f.p is " , this.farwardPaths);
+  }
+
+  getFarwardPathsRecursively(node:string, currentPath:string){
+      if(node == this.endNode)return (currentPath + this.endNode);
+      this.visitedSet.add(node);
+      currentPath += node;
+      let indexOfNode = this.letterToIndex.get(node);
+      for(let i = Number(indexOfNode) + 1 ; i<this.graph[Number(indexOfNode)].length ; i++){
+          if((this.graph[Number(indexOfNode)][i] != 0 && !this.visitedSet.has(String.fromCharCode(65 + i))) ){
+            let str = this.getFarwardPathsRecursively(String.fromCharCode(65 + i), currentPath);
+            if(str.includes(String(this.endNode),0)){
+              this.farwardPaths.push(str);
+            }
+          }
+      }
+      this.visitedSet.delete(node);
+      return "";
+  }
+
+
+
 
 }
