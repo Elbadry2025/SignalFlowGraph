@@ -22,6 +22,7 @@ export class AppComponent implements OnInit {
   graph: Number[][] = [[0]];
   NodeOneSelected: boolean = false;
   insertNode: boolean = false;
+  // loops: number[][] = [];
   count: number = 0;
   ngOnInit(): void {
     document.documentElement.style.setProperty("--wbCursor", "crosshair");
@@ -210,7 +211,9 @@ export class AppComponent implements OnInit {
 
   solve() {
     if (this.graph.length == 0) return;
-    this.getFarwardPaths();
+    //this.getFarwardPaths();
+    this.findAllCycles(this.graph as number[][]);
+
   }
   getFarwardPaths() {
     //i supposed that the source node is A and the dest is the furthest letter
@@ -265,4 +268,59 @@ export class AppComponent implements OnInit {
     }
     console.log(this.farwardPathToGainMap);
   }
+
+ 
+  findAllCycles(graph: number[][]) {
+    const cycles: number[][] = [];
+    const visited: number[] = [];
+    const stack: number[] = [];
+  
+    function dfs(node: number, start: number) {
+      visited[node] = 1;
+      stack.push(node);
+  
+      for (let i = 0; i < graph.length; i++) {
+        if (graph[node][i]) {
+          if (!visited[i]) {
+            dfs(i, start);
+          } else if (i === start) {
+            stack.push(i);
+            let flag : boolean = true;
+            for(let k=1 ; k<stack.length ; k++){
+              if(stack[0] > stack[k]){
+                flag = false;break;
+              }
+
+            }
+            if(flag){
+              cycles.push([...stack]);
+            }
+            stack.pop();
+          }
+        }
+      }
+  
+      stack.pop();
+      visited[node] = 0;
+    }
+  
+    for (let i = 0; i < graph.length; i++) {
+      dfs(i, i);
+    }
+    console.log(cycles);
+    return cycles;
+  }
+  
+  
+
+
+  
+  
+  
+  
+  
+  
 }
+
+
+
