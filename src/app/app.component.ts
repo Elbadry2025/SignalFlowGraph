@@ -118,6 +118,7 @@ export class AppComponent implements OnInit {
 
   connect() {
     this.connecting = true;
+    this.insertNode = false;
   }
 
   drawLine(gain: Number) {
@@ -205,28 +206,33 @@ export class AppComponent implements OnInit {
   //-----------solve part---------------------------
   startNode: String = "";
   endNode: String = "";
-  farwardPaths: string[] = [];
-  farwardPathToGainMap = new Map<String, Number>();
+  forwardPaths: string[] = [];
+  forwardPathToGainMap = new Map<String, Number>();
   visitedSet = new Set<String>();
+  deltai: number[] = [];
+  delta: number = 1;
+  cycles: number[][] = [[]];
+  CycleGains: number[] =[]; 
 
   solve() {
     if (this.graph.length == 0) return;
-    //this.getFarwardPaths();
-    this.findAllCycles(this.graph as number[][]);
-
+    this.getForwardPaths();
+    this.cycles = this.findAllCycles(this.graph as number[][]);
+    this.getCycleGains();
   }
-  getFarwardPaths() {
+
+  getForwardPaths() {
     //i supposed that the source node is A and the dest is the furthest letter
     this.startNode = String.fromCharCode(65 + 0);
     this.endNode = String.fromCharCode(65 + this.graph.length - 1);
     console.log(this.startNode);
     console.log(this.endNode);
-    this.getFarwardPathsRecursively(String(this.startNode), "");
-    console.log("f.p is ", this.farwardPaths);
-    this.constructFarwardGains();
+    this.getForwardPathsRecursively(String(this.startNode), "");
+    console.log("f.p is ", this.forwardPaths);
+    this.constructForwardGains();
   }
 
-  getFarwardPathsRecursively(node: string, currentPath: string) {
+  getForwardPathsRecursively(node: string, currentPath: string) {
     if (node == this.endNode) return currentPath + this.endNode;
     this.visitedSet.add(node);
     currentPath += node;
@@ -240,12 +246,12 @@ export class AppComponent implements OnInit {
         this.graph[Number(indexOfNode)][i] != 0 &&
         !this.visitedSet.has(String.fromCharCode(65 + i))
       ) {
-        let str = this.getFarwardPathsRecursively(
+        let str = this.getForwardPathsRecursively(
           String.fromCharCode(65 + i),
           currentPath
         );
         if (str.includes(String(this.endNode), 0)) {
-          this.farwardPaths.push(str);
+          this.forwardPaths.push(str);
         }
       }
     }
@@ -253,8 +259,8 @@ export class AppComponent implements OnInit {
     return "";
   }
 
-  constructFarwardGains() {
-    for (let str of this.farwardPaths) {
+  constructForwardGains() {
+    for (let str of this.forwardPaths) {
       let gain = 1;
       for (let i = 0; i < str.length - 1; i++) {
         let j = i + 1;
@@ -264,16 +270,15 @@ export class AppComponent implements OnInit {
           gain.valueOf() *
           this.graph[index1.valueOf()][index2.valueOf()].valueOf();
       }
-      this.farwardPathToGainMap.set(str, gain);
+      this.forwardPathToGainMap.set(str, gain);
     }
-    console.log(this.farwardPathToGainMap);
+    console.log(this.forwardPathToGainMap);
   }
 
- 
   findAllCycles(graph: number[][]) {
     const cycles: number[][] = [];
     const visited: number[] = [];
-    const stack: number[] = [];
+    let stack: number[] = [];
   
     function dfs(node: number, start: number) {
       visited[node] = 1;
@@ -311,14 +316,25 @@ export class AppComponent implements OnInit {
     return cycles;
   }
   
-  
+  getCycleGains(){
+    this.CycleGains = new Array(this.cycles.length).fill(1);
+    for(let i=0; i<this.cycles.length; i++){
+      for(let j=0; j<this.cycles[i].length-1; j++){
+          this.CycleGains[i] *= this.graph[this.cycles[i][j]][this.cycles[i][j+1]] as number;
+      }
+    }
+    console.log(this.CycleGains);
+  }
+  getDelta(){
 
-
-  
-  
-  
-  
-  
+  }
+  transferfunction(){
+    let sum = 0;
+    for(let i=0; i<this.forwardPaths.length; i++){
+      sum += (this.forwardPathToGainMap.get(this.forwardPaths[i]) as number)* this.deltai[i];
+    }
+    console.log(sum/this.delta);
+  }
   
 }
 
