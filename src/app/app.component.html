@@ -1,4 +1,4 @@
-<div class="body">
+<div class="body" id = "body">
   <div class="toolbar">
     <button class="circleButton" (click)="drawNode()"><i class="fa-solid fa-circle" style="color: red
     ;"></i> <p>Add Node</p> </button>
@@ -20,4 +20,21 @@
 
   </div>
 
+</div>
+
+<div id="final-solution-field">
+  <h2>Farward paths are: </h2>
+  <hr>
+  <div id="farward-paths-field">
+    <table id = "fp-table">
+      <thead id = "fp-table-head">
+        <tr>
+          <td>Farward path</td>
+          <td>Farward path gain</td>
+        </tr>
+      </thead>
+      <tbody id = "fp-table-body">
+      </tbody>
+    </table>
+  </div>
 </div>

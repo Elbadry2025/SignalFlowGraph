@@ -212,13 +212,63 @@ export class AppComponent implements OnInit {
   deltai: number[] = [];
   delta: number = 1;
   cycles: number[][] = [[]];
-  CycleGains: number[] =[]; 
+  CycleGains: number[] = [];
 
   solve() {
     if (this.graph.length == 0) return;
     this.getForwardPaths();
     this.cycles = this.findAllCycles(this.graph as number[][]);
     this.getCycleGains();
+    /*
+      here should be invokation of the functions the get all the deltas and the delta 
+    */
+    // (<HTMLDivElement>document.getElementById("body")).style.overflowY = "auto";
+    this.displaySolution();
+  }
+
+  displaySolution() {
+    (<HTMLDivElement>(
+      document.getElementById("final-solution-field")
+    )).style.display = "block";
+    this.displayFPs();
+    //TODO displaying the rest of the solution
+  }
+
+  displayFPs() {
+    let fp_field = <HTMLDivElement>(
+      document.getElementById("farward-paths-field")
+    );
+    let fp_table_body = <HTMLDivElement>(
+      document.getElementById("fp-table-body")
+    );
+    for (let i = 0; i < this.forwardPaths.length; i++) {
+      let tmp = "";
+      for (let j = 0; j < this.forwardPaths[i].length; j++) {
+        tmp += this.forwardPaths[i].charAt(j);
+        if (j != this.forwardPaths[i].length - 1) tmp += " => ";
+      }
+      let currentFp = document.createElement("tr");
+      currentFp.id = `fp-${i}`;
+      let fp_i = document.createElement("td");
+      let fp_i_gain = document.createElement("td");
+      fp_i.style.padding = "15px";
+      fp_i.style.fontSize = "1.2em";
+      fp_i.style.borderRadius = "40px";
+      fp_i.style.textAlign = "center";
+      fp_i.style.backgroundColor = "#eee";
+      fp_i_gain.style.padding = "15px";
+      fp_i_gain.style.fontSize = "1.2em";
+      fp_i_gain.style.borderRadius = "40px";
+      fp_i_gain.style.textAlign = "center";
+      fp_i_gain.style.backgroundColor = "#eee";
+      fp_i.innerText = tmp;
+      fp_i_gain.innerText = String(
+        this.forwardPathToGainMap.get(this.forwardPaths[i])
+      );
+      currentFp.appendChild(fp_i);
+      currentFp.appendChild(fp_i_gain);
+      fp_table_body.appendChild(currentFp);
+    }
   }
 
   getForwardPaths() {
@@ -279,64 +329,64 @@ export class AppComponent implements OnInit {
     const cycles: number[][] = [];
     const visited: number[] = [];
     let stack: number[] = [];
-  
+
     function dfs(node: number, start: number) {
       visited[node] = 1;
       stack.push(node);
-  
+
       for (let i = 0; i < graph.length; i++) {
         if (graph[node][i]) {
           if (!visited[i]) {
             dfs(i, start);
           } else if (i === start) {
             stack.push(i);
-            let flag : boolean = true;
-            for(let k=1 ; k<stack.length ; k++){
-              if(stack[0] > stack[k]){
-                flag = false;break;
+            let flag: boolean = true;
+            for (let k = 1; k < stack.length; k++) {
+              if (stack[0] > stack[k]) {
+                flag = false;
+                break;
               }
-
             }
-            if(flag){
+            if (flag) {
               cycles.push([...stack]);
             }
             stack.pop();
           }
         }
       }
-  
+
       stack.pop();
       visited[node] = 0;
     }
-  
+
     for (let i = 0; i < graph.length; i++) {
       dfs(i, i);
     }
     console.log(cycles);
     return cycles;
   }
-  
-  getCycleGains(){
+
+  getCycleGains() {
     this.CycleGains = new Array(this.cycles.length).fill(1);
-    for(let i=0; i<this.cycles.length; i++){
-      for(let j=0; j<this.cycles[i].length-1; j++){
-          this.CycleGains[i] *= this.graph[this.cycles[i][j]][this.cycles[i][j+1]] as number;
+    for (let i = 0; i < this.cycles.length; i++) {
+      for (let j = 0; j < this.cycles[i].length - 1; j++) {
+        this.CycleGains[i] *= this.graph[this.cycles[i][j]][
+          this.cycles[i][j + 1]
+        ] as number;
       }
     }
     console.log(this.CycleGains);
   }
-  getDelta(){
 
-  }
-  transferfunction(){
+  getDelta() {}
+
+  transferfunction() {
     let sum = 0;
-    for(let i=0; i<this.forwardPaths.length; i++){
-      sum += (this.forwardPathToGainMap.get(this.forwardPaths[i]) as number)* this.deltai[i];
+    for (let i = 0; i < this.forwardPaths.length; i++) {
+      sum +=
+        (this.forwardPathToGainMap.get(this.forwardPaths[i]) as number) *
+        this.deltai[i];
     }
-    console.log(sum/this.delta);
+    console.log(sum / this.delta);
   }
-  
 }
-
-
-
