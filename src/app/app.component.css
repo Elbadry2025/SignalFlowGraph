@@ -123,12 +123,15 @@ p {
   padding: 30px;
 }
 
-
-#fp-table-body td{
+h2{
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+#fp-table-body td, #loops-table-body td{
   text-align: center;
 }
 
-#fp-table{
+#fp-table, #loops-table{
   margin-top: 30px;
   border: 4px solid #ccc;
   width: 50%;
@@ -138,16 +141,20 @@ p {
   border-radius: 30px;
 }
 
-#fp-table-head{
+#loops-table{
+
+}
+
+#fp-table-head, #loops-table-head{
   font-weight: bold;
 }
-#fp-table-head td{
+#fp-table-head td, #loops-table-head td{
   background-color: red;
   color: white;
   border-radius: 40px;
   font-size: 1.25em;
   text-align: center;
 }
-#fp-table td{
+#fp-table td, #loops-table td{
   padding: 15px;
 }

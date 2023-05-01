@@ -62,6 +62,7 @@ export class AppComponent implements OnInit {
     console.log(circle);
     const group = new Konva.Group();
     group.add(circle);
+
     group.add(label);
 
     this.layer.add(group).batchDraw;
@@ -231,6 +232,7 @@ export class AppComponent implements OnInit {
       document.getElementById("final-solution-field")
     )).style.display = "block";
     this.displayFPs();
+    this.displayCycles();
     //TODO displaying the rest of the solution
   }
 
@@ -268,6 +270,44 @@ export class AppComponent implements OnInit {
       currentFp.appendChild(fp_i);
       currentFp.appendChild(fp_i_gain);
       fp_table_body.appendChild(currentFp);
+    }
+  }
+
+  displayCycles(){
+    let fp_field = <HTMLDivElement>(
+      document.getElementById("loops-field")
+    );
+    let fp_table_body = <HTMLDivElement>(
+      document.getElementById("loops-table-body")
+    );
+    for (let i = 0; i < this.cycles.length; i++) {
+      let gain = this.CycleGains[i];
+      let tmp = "";
+      for (let j = 0; j < this.cycles[i].length; j++) {
+        tmp += String.fromCharCode(65 + this.cycles[i][j]);
+        if (j != this.cycles[i].length - 1) tmp += " => ";
+      }
+      let currentcycle = document.createElement("tr");
+      currentcycle.id = `cycle-${i}`;
+      let cycle_i = document.createElement("td");
+      let cycle_i_gain = document.createElement("td");
+      cycle_i.style.padding = "15px";
+      cycle_i.style.fontSize = "1.2em";
+      cycle_i.style.borderRadius = "40px";
+      cycle_i.style.textAlign = "center";
+      cycle_i.style.backgroundColor = "#eee";
+      cycle_i_gain.style.padding = "15px";
+      cycle_i_gain.style.fontSize = "1.2em";
+      cycle_i_gain.style.borderRadius = "40px";
+      cycle_i_gain.style.textAlign = "center";
+      cycle_i_gain.style.backgroundColor = "#eee";
+      cycle_i.innerText = tmp;
+      cycle_i_gain.innerText = String(
+        gain
+      );
+      currentcycle.appendChild(cycle_i);
+      currentcycle.appendChild(cycle_i_gain);
+      fp_table_body.appendChild(currentcycle);
     }
   }
 
@@ -379,7 +419,6 @@ export class AppComponent implements OnInit {
   }
 
   getDelta() {}
-
   transferfunction() {
     let sum = 0;
     for (let i = 0; i < this.forwardPaths.length; i++) {
