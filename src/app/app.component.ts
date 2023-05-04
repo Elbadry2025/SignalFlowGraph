@@ -58,6 +58,7 @@ export class AppComponent implements OnInit {
             fill: "red",
             stroke: "black",
             strokeWidth: 4,
+            text: String.fromCharCode(65 + this.shapes.length),
         });
         let Str: String = String.fromCharCode(65 + this.shapes.length);
         let key: Number = this.stage.getPointerPosition()?.x as number;
@@ -141,6 +142,7 @@ export class AppComponent implements OnInit {
         var y2 = this.node2.y();
         var controlX = 0;
         var controlY = 0;
+        let distanceX = Math.abs(x2 - x1);
         var isFeedBack: boolean = false;
         var index1: Number = Number(
             this.letterToIndex.get(String(this.xToNodeMap.get(this.node1.x())))
@@ -148,25 +150,28 @@ export class AppComponent implements OnInit {
         var index2: Number = Number(
             this.letterToIndex.get(String(this.xToNodeMap.get(this.node2.x())))
         );
-        if (
-            x2 > x1 &&
-            this.graph[Number(index1)][Number(index2)] == 0 &&
-            Math.abs(Number(index1) - Number(index2)) <= 1
-        ) {
-            x1 += 30;
-            x2 -= 30;
-            controlX = x1;
-            controlY = y1;
-        } else if (x2 == x1 && y2 == y1) {
+        if (x2 > x1) {
+            if(Math.abs(Number(index1) - Number(index2)) > 1){
+                y1 -= 30;
+                y2 -= 30;
+                controlX = (x1 + x2)/2;
+                controlY = Math.min(y1,y2) - distanceX/2 +40;
+            }else{
+                x1 += 30;
+                x2 -= 30;
+                controlX = (x1 + x2)/2;
+                controlY = (y1 + y2)/2;
+            }
+        } else if (x2 == x1 && y2 == y1) {  // self loop
             controlX = x1;
             controlY = y1 + 75;
             x1 -= 30;
             x2 += 30;
-        } else {
+        } else {    //feedback
             y1 += 30;
             y2 += 30;
             controlX = (x1 + x2) / 2;
-            controlY = y2 + 60;
+            controlY = Math.min(y1, y2) + distanceX / 2 -40;
             isFeedBack = true;
         }
 
@@ -176,14 +181,9 @@ export class AppComponent implements OnInit {
             stroke: "black",
             strokeWidth: 2,
         });
-        var Xgain = (x1 + x2) / 2;
-        var Ygain = (this.stage.getPointerPosition()?.y as number) - 10;
-        if (isFeedBack) {
-            Ygain += 100;
-        }
         const label = new Konva.Text({
-            x: Xgain,
-            y: Ygain,
+            x: controlX,
+            y: controlY,
             text: String(gain),
             fontSize: 20,
             fill: "black",
