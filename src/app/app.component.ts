@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
     // loops: number[][] = [];
     count: number = 0;
     nonTouchingLoops: number[][][] = [];
-    maxNodeSize : number = 25;
+    maxNodeSize: number = 25;
 
     constructor(private powerSet: PowerSetService) {
 
@@ -151,16 +151,16 @@ export class AppComponent implements OnInit {
             this.letterToIndex.get(String(this.xToNodeMap.get(this.node2.x())))
         );
         if (x2 > x1) {
-            if(Math.abs(Number(index1) - Number(index2)) > 1){
+            if (Math.abs(Number(index1) - Number(index2)) > 1) {
                 y1 -= 30;
                 y2 -= 30;
-                controlX = (x1 + x2)/2;
-                controlY = Math.min(y1,y2) - distanceX/2 +40;
-            }else{
+                controlX = (x1 + x2) / 2;
+                controlY = Math.min(y1, y2) - distanceX / 2 + 40;
+            } else {
                 x1 += 30;
                 x2 -= 30;
-                controlX = (x1 + x2)/2;
-                controlY = (y1 + y2)/2;
+                controlX = (x1 + x2) / 2;
+                controlY = (y1 + y2) / 2;
             }
         } else if (x2 == x1 && y2 == y1) {  // self loop
             controlX = x1;
@@ -171,7 +171,7 @@ export class AppComponent implements OnInit {
             y1 += 30;
             y2 += 30;
             controlX = (x1 + x2) / 2;
-            controlY = Math.min(y1, y2) + distanceX / 2 -40;
+            controlY = Math.min(y1, y2) + distanceX / 2 - 40;
             isFeedBack = true;
         }
 
@@ -240,9 +240,11 @@ export class AppComponent implements OnInit {
         // (<HTMLDivElement>document.getElementById("body")).style.overflowY = "auto";
         this.displaySolution();
 
-        this.getAllNonTouchingLoops();
-        this.getDelta();
+        this.nonTouchingLoops = this.getAllNonTouchingLoops(this.cycles);
+        this.delta = this.getDelta(this.nonTouchingLoops);
         this.getLoopsOfDifferentPaths();
+        this.getDeltaIs();
+        this.transferFunction();
     }
 
     displaySolution() {
@@ -328,7 +330,6 @@ export class AppComponent implements OnInit {
             fp_table_body.appendChild(currentcycle);
         }
 
-        this.getAllNonTouchingLoops();
     }
 
     getForwardPaths() {
@@ -438,49 +439,53 @@ export class AppComponent implements OnInit {
         console.log(this.CycleGains);
     }
 
-    getLoopsOfDifferentPaths(){
-        for(let k=0; k< this.forwardPaths.length; k++){
+    getLoopsOfDifferentPaths() {
+        for (let k = 0; k < this.forwardPaths.length; k++) {
             this.differentCycles[k] = [];
-            for(let i=0; i< this.cycles.length; i++){
+            for (let i = 0; i < this.cycles.length; i++) {
                 let flag = true;
-                for(let j=0; j< this.forwardPaths[k].length; j++){
-                    for(let h=0; h< this.cycles[i].length; h++){
-                        if(this.cycles[i][h] == (this.forwardPaths[k].charCodeAt(j)-65)){
+                for (let j = 0; j < this.forwardPaths[k].length; j++) {
+                    for (let h = 0; h < this.cycles[i].length; h++) {
+                        if (this.cycles[i][h] == (this.forwardPaths[k].charCodeAt(j) - 65)) {
                             flag = false;
                         }
                     }
                 }
-                if(flag){
+                if (flag) {
                     this.differentCycles[k].push(this.cycles[i]);
                 }
             }
         }
-        console.log('sdoifj');
         console.log(this.differentCycles);
     }
 
-    getAllNonTouchingLoops() {
+    getAllNonTouchingLoops(cycles: number[][]): number[][][] {
+        
 
         let tempList: { array: number[], index: number }[] = [];
-        for (let i = 0; i < this.cycles.length; i++) {
+        for (let i = 0; i < cycles.length; i++) {
             tempList.push({
-                array: this.cycles[i],
+                array: cycles[i],
                 index: i
             });
         }
 
-        console.log(tempList);
+
+        let nonTouchingLoops: number[][][] = [];
+
+        this.powerSet.list = [];
+        this.powerSet.subSets = [];
+        this.powerSet.tempList = [];
 
         this.powerSet.list = tempList;
         this.powerSet.generateSubsetsRecursive(0);
         this.powerSet.subSets.sort((a, b) => a.length - b.length);
-        this.powerSet.subSets = [...new Set(this.powerSet.subSets.map(x => JSON.stringify(x)))].map(x => JSON.parse(x));
-        console.log(this.powerSet.subSets);
+        this.powerSet.subSets = [...new Set(this.powerSet.subSets.
+        map(x => JSON.stringify(x)))].map(x => JSON.parse(x));
 
-        // map number of non-touching loops to array of loop indices
 
         for (let i = 0; i < this.maxNodeSize; i++) {
-            this.nonTouchingLoops[i] = [];
+            nonTouchingLoops[i] = [];
             for (let j = 0; j < this.powerSet.subSets.length; j++) {
                 if (this.powerSet.subSets[j].length === i) {
                     let expectedSize: number = 0;
@@ -493,33 +498,39 @@ export class AppComponent implements OnInit {
                     if (expectedSize === tempSet.size) {
                         let tempList: number[] = [];
                         this.powerSet.subSets[j].forEach(a => tempList.push(a.index));
-                        this.nonTouchingLoops[i].push(tempList);
+                        nonTouchingLoops[i].push(tempList);
                     }
                 }
             }
         }
 
-        console.log(this.nonTouchingLoops);
-
+        return nonTouchingLoops;
     }
 
-    getDelta() {
-        this.delta = 1;
+    getDelta(nonTouchingLoops: number[][][]) {
+        let delta: number = 1;
 
-        for (let i = 1; this.nonTouchingLoops[i].length > 0; i++) {
+        for (let i = 1; nonTouchingLoops[i].length > 0; i++) {
             let temp = 0;
 
-            for (let j = 0; j < this.nonTouchingLoops[i].length; j++) {
-                let product = this.nonTouchingLoops[i][j].reduce((accumulator, currentValue) => {
+            for (let j = 0; j < nonTouchingLoops[i].length; j++) {
+                let product = nonTouchingLoops[i][j].reduce((accumulator, currentValue) => {
                     return accumulator * this.CycleGains[currentValue];
                 }, 1);
 
                 temp += product;
             }
-            this.delta += ((i % 2 == 1) ? -1 : 1) * temp;
+            delta += ((i % 2 == 1) ? -1 : 1) * temp;
         }
 
-        console.log(this.delta);
+        return delta;
+    }
+
+    getDeltaIs() {
+        this.getLoopsOfDifferentPaths();
+        for (let i = 0; i < this.forwardPaths.length; i++) {
+            this.deltai[i] = this.getDelta(this.getAllNonTouchingLoops(this.differentCycles[i]));
+        }
     }
 
     transferFunction() {
@@ -529,6 +540,9 @@ export class AppComponent implements OnInit {
                 (this.forwardPathToGainMap.get(this.forwardPaths[i]) as number) *
                 this.deltai[i];
         }
-        console.log(sum / this.delta);
+
+        let result = sum / this.delta;
+        console.log(result);
+        return result;
     }
 }
