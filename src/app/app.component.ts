@@ -226,6 +226,7 @@ export class AppComponent implements OnInit {
     delta: number = 1;
     cycles: number[][] = [[]];
     CycleGains: number[] = [];
+    differentCycles: number[][][] = [[[]]];
 
     solve() {
         if (this.graph.length == 0) return;
@@ -241,6 +242,7 @@ export class AppComponent implements OnInit {
 
         this.getAllNonTouchingLoops();
         this.getDelta();
+        this.getLoopsOfDifferentPaths();
     }
 
     displaySolution() {
@@ -436,6 +438,26 @@ export class AppComponent implements OnInit {
         console.log(this.CycleGains);
     }
 
+    getLoopsOfDifferentPaths(){
+        for(let k=0; k< this.forwardPaths.length; k++){
+            this.differentCycles[k] = [];
+            for(let i=0; i< this.cycles.length; i++){
+                let flag = true;
+                for(let j=0; j< this.forwardPaths[k].length; j++){
+                    for(let h=0; h< this.cycles[i].length; h++){
+                        if(this.cycles[i][h] == (this.forwardPaths[k].charCodeAt(j)-65)){
+                            flag = false;
+                        }
+                    }
+                }
+                if(flag){
+                    this.differentCycles[k].push(this.cycles[i]);
+                }
+            }
+        }
+        console.log('sdoifj');
+        console.log(this.differentCycles);
+    }
 
     getAllNonTouchingLoops() {
 
