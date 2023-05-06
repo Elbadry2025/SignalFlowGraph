@@ -134,15 +134,15 @@ h2{
 #fp-table, #loops-table{
   margin-top: 30px;
   border: 4px solid #ccc;
-  width: 50%;
+  /* width: 50%; */
   color: black;
   border-spacing: 15px;
   font-weight: bold;
   border-radius: 30px;
 }
 
-#loops-table{
-
+ol{
+  list-style-type: none;
 }
 
 #fp-table-head, #loops-table-head{
@@ -157,4 +157,32 @@ h2{
 }
 #fp-table td, #loops-table td{
   padding: 15px;
+}
+
+#nonTouching-list {
+  margin-top: 30px;
+
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  /* margin-top: 50px; */
+}
+
+#All-loops{
+  display: flex;
+  flex-direction: row;
+}
+
+#All-loops div{
+  flex-basis: calc(50% - 10px);
+}
+
+#final-result{
+  font-size: 1.25em;
+  background-color: inherit;
+  color: white;
+  padding: 20px;
+  border-radius: 40px;
+  font-weight: 600;
+  margin-top: 50px;
 }

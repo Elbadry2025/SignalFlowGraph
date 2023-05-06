@@ -217,6 +217,7 @@ export class AppComponent implements OnInit {
     }
 
     //-----------solve part---------------------------
+    
     startNode: String = "";
     endNode: String = "";
     forwardPaths: string[] = [];
@@ -229,22 +230,30 @@ export class AppComponent implements OnInit {
     differentCycles: number[][][] = [[[]]];
 
     solve() {
+        this.startNode = "";
+        this.endNode = "";
+        this.forwardPaths = [];
+        this.forwardPathToGainMap = new Map<String, Number>();
+        this.visitedSet = new Set<String>();
+        this.deltai = [];
+        this.delta = 1;
+        this.cycles = [[]];
+        this.CycleGains = [];
+        this.differentCycles = [[[]]];
+
         if (this.graph.length == 0) return;
 
         this.getForwardPaths();
         this.cycles = this.findAllCycles(this.graph as number[][]);
         this.getCycleGains();
-        /*
-          here should be invokation of the functions the get all the deltas and the delta
-        */
-        // (<HTMLDivElement>document.getElementById("body")).style.overflowY = "auto";
-        this.displaySolution();
-
         this.nonTouchingLoops = this.getAllNonTouchingLoops(this.cycles);
         this.delta = this.getDelta(this.nonTouchingLoops);
         this.getLoopsOfDifferentPaths();
         this.getDeltaIs();
         this.transferFunction();
+
+
+        this.displaySolution();
     }
 
     displaySolution() {
@@ -253,6 +262,8 @@ export class AppComponent implements OnInit {
         )).style.display = "block";
         this.displayFPs();
         this.displayCycles();
+        this.displayNonTouching();
+        this.displayFinalResult();
         //TODO displaying the rest of the solution
     }
 
@@ -263,6 +274,7 @@ export class AppComponent implements OnInit {
         let fp_table_body = <HTMLDivElement>(
             document.getElementById("fp-table-body")
         );
+        fp_table_body.innerHTML = "";
         for (let i = 0; i < this.forwardPaths.length; i++) {
             let tmp = "";
             for (let j = 0; j < this.forwardPaths[i].length; j++) {
@@ -300,13 +312,10 @@ export class AppComponent implements OnInit {
         let fp_table_body = <HTMLDivElement>(
             document.getElementById("loops-table-body")
         );
+        fp_table_body.innerHTML = "";
         for (let i = 0; i < this.cycles.length; i++) {
             let gain = this.CycleGains[i];
-            let tmp = "";
-            for (let j = 0; j < this.cycles[i].length; j++) {
-                tmp += String.fromCharCode(65 + this.cycles[i][j]);
-                if (j != this.cycles[i].length - 1) tmp += " => ";
-            }
+            let tmp = this.getLoop(i);
             let currentcycle = document.createElement("tr");
             currentcycle.id = `cycle-${i}`;
             let cycle_i = document.createElement("td");
@@ -329,17 +338,75 @@ export class AppComponent implements OnInit {
             currentcycle.appendChild(cycle_i_gain);
             fp_table_body.appendChild(currentcycle);
         }
-
     }
 
+    displayNonTouching(){
+        let tmp = [];
+        for(let i = 0 ; i<this.nonTouchingLoops.length ; i++){
+            if(this.nonTouchingLoops[i].length == 0)break;
+            for(let j = 0 ; j<this.nonTouchingLoops[i].length ; j++){
+                if(this.nonTouchingLoops[i][j].length == 1 || this.nonTouchingLoops[i][j].length == 0)break;
+                let currNonTouching = "[";
+                for(let k = 0 ; k<this.nonTouchingLoops[i][j].length ; k++){
+                    let tmp = "(" + this.getLoop(this.nonTouchingLoops[i][j][k]) + ")";
+                    currNonTouching += tmp;
+                    if(k != this.nonTouchingLoops[i][j].length-1)currNonTouching += ", ";
+                }
+                currNonTouching += "]";
+                tmp.push(currNonTouching);
+            }
+        }
+        
+        let nonTouching_list = (<HTMLOListElement>document.getElementById("nonTouching-list"));
+        nonTouching_list.innerHTML = "";
+        for(let i = 0 ; i<tmp.length ; i++){
+            let currentI = document.createElement("li");
+            currentI.id = `non-${i}`;
+            currentI.innerText = tmp[i];
+            currentI.style.margin = "10px";
+            currentI.style.fontSize = "1.2em";
+            currentI.style.fontWeight = "600";
+            currentI.style.backgroundColor = "rgb(238, 238, 238)";
+            currentI.style.color = "black";
+            currentI.style.padding = "10px";
+            currentI.style.width = "fit-content";
+            currentI.style.borderRadius = "20px";
+            // currentI.style.flexBasis = "calc(25% - 10px)"
+            nonTouching_list.appendChild(currentI);
+        }
+    }
+
+    displayFinalResult(){
+        if(this.deltai.length == 0)return;
+        let deltaisList = <HTMLOListElement>document.getElementById("deltais-list");
+        deltaisList.innerHTML = "";
+        for(let i = 0 ; i<=this.deltai.length ; i++){
+            let currentDeltaI = document.createElement("li");
+            currentDeltaI.innerHTML = (i == 0)? `<h3>△ = ${this.delta}</h3>` : `<h3>△<sub>${i}</sub> = ${this.deltai[i-1]}</h3>`;
+            currentDeltaI.style.marginBottom = "10px";
+            currentDeltaI.style.marginBottom  = "20px"
+            deltaisList.appendChild(currentDeltaI);
+        }
+        let tf = <HTMLDivElement>document.getElementById("tf");
+        tf.innerHTML = "";
+        let res = document.createElement("h2");
+        res.innerText = "The over all TF = " + this.transferFunction();
+        tf.appendChild(res);
+    }
+
+
+    getLoop(i:Number){
+        let tmp = "";
+        for (let j = 0; j < this.cycles[Number(i)].length; j++) {
+            tmp += String.fromCharCode(65 + this.cycles[Number(i)][j]);
+            if (j != this.cycles[Number(i)].length - 1) tmp += " => ";
+        }
+        return tmp;
+    }
     getForwardPaths() {
-        //i supposed that the source node is A and the dest is the furthest letter
         this.startNode = String.fromCharCode(65 + 0);
         this.endNode = String.fromCharCode(65 + this.graph.length - 1);
-        console.log(this.startNode);
-        console.log(this.endNode);
         this.getForwardPathsRecursively(String(this.startNode), "");
-        console.log("f.p is ", this.forwardPaths);
         this.constructForwardGains();
     }
 
@@ -383,7 +450,6 @@ export class AppComponent implements OnInit {
             }
             this.forwardPathToGainMap.set(str, gain);
         }
-        console.log(this.forwardPathToGainMap);
     }
 
     findAllCycles(graph: number[][]) {
@@ -423,7 +489,6 @@ export class AppComponent implements OnInit {
         for (let i = 0; i < graph.length; i++) {
             dfs(i, i);
         }
-        console.log(cycles);
         return cycles;
     }
 
@@ -436,7 +501,6 @@ export class AppComponent implements OnInit {
                     ] as number;
             }
         }
-        console.log(this.CycleGains);
     }
 
     getLoopsOfDifferentPaths() {
@@ -456,7 +520,6 @@ export class AppComponent implements OnInit {
                 }
             }
         }
-        console.log(this.differentCycles);
     }
 
     getAllNonTouchingLoops(cycles: number[][]): number[][][] {
@@ -503,26 +566,21 @@ export class AppComponent implements OnInit {
                 }
             }
         }
-
         return nonTouchingLoops;
     }
 
     getDelta(nonTouchingLoops: number[][][]) {
         let delta: number = 1;
-
         for (let i = 1; nonTouchingLoops[i].length > 0; i++) {
             let temp = 0;
-
             for (let j = 0; j < nonTouchingLoops[i].length; j++) {
                 let product = nonTouchingLoops[i][j].reduce((accumulator, currentValue) => {
                     return accumulator * this.CycleGains[currentValue];
                 }, 1);
-
                 temp += product;
             }
             delta += ((i % 2 == 1) ? -1 : 1) * temp;
         }
-
         return delta;
     }
 
@@ -542,7 +600,6 @@ export class AppComponent implements OnInit {
         }
 
         let result = sum / this.delta;
-        console.log(result);
         return result;
     }
 }
