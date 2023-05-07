@@ -213,7 +213,13 @@ export class AppComponent implements OnInit {
             "none";
         (<HTMLDivElement>document.getElementById("popup")).style.display = "none";
         if (Number(gain) == 0) this.drawLine(1);
-        else this.drawLine(Number(gain));
+        else{
+            if(isNaN(Number(gain))){
+                alert("Enter a valid numeric gain please..!");
+            }else{
+                this.drawLine(Number(gain));
+               }
+            }
     }
 
     //-----------solve part---------------------------
@@ -230,6 +236,12 @@ export class AppComponent implements OnInit {
     differentCycles: number[][][] = [[[]]];
 
     solve() {
+        // this.graph = [[0,2,4.5,0],[-7,0,0.5,6],[0,-2,0,3],[-10,0,0,0]];
+        // this.letterToIndex.set("A",0);
+        // this.letterToIndex.set("B",1);
+        // this.letterToIndex.set("C",2);
+        // this.letterToIndex.set("D",3);
+
         this.startNode = "";
         this.endNode = "";
         this.forwardPaths = [];
@@ -248,6 +260,7 @@ export class AppComponent implements OnInit {
         this.getCycleGains();
         this.nonTouchingLoops = this.getAllNonTouchingLoops(this.cycles);
         this.delta = this.getDelta(this.nonTouchingLoops);
+
         this.getLoopsOfDifferentPaths();
         this.getDeltaIs();
         this.transferFunction();
@@ -411,30 +424,33 @@ export class AppComponent implements OnInit {
     }
 
     getForwardPathsRecursively(node: string, currentPath: string) {
-        if (node == this.endNode) return currentPath + this.endNode;
         this.visitedSet.add(node);
         currentPath += node;
-        let indexOfNode = this.letterToIndex.get(node);
-        for (
-            let i = Number(indexOfNode) + 1;
-            i < this.graph[Number(indexOfNode)].length;
-            i++
-        ) {
-            if (
+        if (node == this.endNode) this.forwardPaths.push(currentPath);
+        else{
+            let indexOfNode = this.letterToIndex.get(node);
+            for (
+              let i = 0;
+              i < this.graph[Number(indexOfNode)].length;
+              i++
+            ) {
+    
+              if (
                 this.graph[Number(indexOfNode)][i] != 0 &&
                 !this.visitedSet.has(String.fromCharCode(65 + i))
-            ) {
-                let str = this.getForwardPathsRecursively(
-                    String.fromCharCode(65 + i),
-                    currentPath
+              ) {
+    
+                this.getForwardPathsRecursively(
+                  String.fromCharCode(65 + i),
+                  currentPath
                 );
-                if (str.includes(String(this.endNode), 0)) {
-                    this.forwardPaths.push(str);
-                }
+              }
             }
         }
+        
         this.visitedSet.delete(node);
-        return "";
+        currentPath = currentPath.substring(0,currentPath.length-1)
+        // console.log(,currentPath);
     }
 
     constructForwardGains() {
@@ -520,6 +536,7 @@ export class AppComponent implements OnInit {
                 }
             }
         }
+        
     }
 
     getAllNonTouchingLoops(cycles: number[][]): number[][][] {
@@ -527,13 +544,14 @@ export class AppComponent implements OnInit {
 
         let tempList: { array: number[], index: number }[] = [];
         for (let i = 0; i < cycles.length; i++) {
+            let pos = this.getIndexOFLoop(cycles[i]);
             tempList.push({
                 array: cycles[i],
-                index: i
+                index: pos
             });
         }
 
-
+        console.log("Tmp list is ", tempList);
         let nonTouchingLoops: number[][][] = [];
 
         this.powerSet.list = [];
@@ -570,6 +588,7 @@ export class AppComponent implements OnInit {
     }
 
     getDelta(nonTouchingLoops: number[][][]) {
+        console.log("Current non touching is " , nonTouchingLoops);
         let delta: number = 1;
         for (let i = 1; nonTouchingLoops[i].length > 0; i++) {
             let temp = 0;
@@ -587,8 +606,23 @@ export class AppComponent implements OnInit {
     getDeltaIs() {
         this.getLoopsOfDifferentPaths();
         for (let i = 0; i < this.forwardPaths.length; i++) {
+            console.log("Different cycles of delta " + i + " is ", this.differentCycles[i]);
             this.deltai[i] = this.getDelta(this.getAllNonTouchingLoops(this.differentCycles[i]));
         }
+        console.log("Delta i is " + this.deltai);
+    }
+
+    getIndexOFLoop(arr:Number[]){
+        for(let i = 0 ; i<this.cycles.length ; i++){
+            for(let j = 0 ; j<this.cycles[i].length ; j++){
+                let count = 0;
+                for(let k = 0 ; k<arr.length ; k++){
+                    if(this.cycles[i][k] == arr[k])count++;
+                }
+                if(count == arr.length)return i;
+            }
+        }
+        return -1;
     }
 
     transferFunction() {
