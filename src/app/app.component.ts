@@ -451,7 +451,6 @@ export class AppComponent implements OnInit {
         
         this.visitedSet.delete(node);
         currentPath = currentPath.substring(0,currentPath.length-1)
-        // console.log(,currentPath);
     }
 
     constructForwardGains() {
@@ -541,8 +540,6 @@ export class AppComponent implements OnInit {
     }
 
     getAllNonTouchingLoops(cycles: number[][]): number[][][] {
-        
-
         let tempList: { array: number[], index: number }[] = [];
         for (let i = 0; i < cycles.length; i++) {
             let pos = this.getIndexOFLoop(cycles[i]);
@@ -551,8 +548,6 @@ export class AppComponent implements OnInit {
                 index: pos
             });
         }
-
-        console.log("Tmp list is ", tempList);
         let nonTouchingLoops: number[][][] = [];
 
         this.powerSet.list = [];
@@ -589,7 +584,6 @@ export class AppComponent implements OnInit {
     }
 
     getDelta(nonTouchingLoops: number[][][]) {
-        console.log("Current non touching is " , nonTouchingLoops);
         let delta: number = 1;
         for (let i = 1; nonTouchingLoops[i].length > 0; i++) {
             let temp = 0;
@@ -610,7 +604,6 @@ export class AppComponent implements OnInit {
             console.log("Different cycles of delta " + i + " is ", this.differentCycles[i]);
             this.deltai[i] = this.getDelta(this.getAllNonTouchingLoops(this.differentCycles[i]));
         }
-        console.log("Delta i is " + this.deltai);
     }
 
     getIndexOFLoop(arr:Number[]){
