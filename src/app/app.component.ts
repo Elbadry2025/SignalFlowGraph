@@ -155,7 +155,7 @@ export class AppComponent implements OnInit {
                 y1 -= 30;
                 y2 -= 30;
                 controlX = (x1 + x2) / 2;
-                controlY = Math.min(y1, y2) - distanceX / 2 + 40;
+                controlY = Math.min(y1, y2) - distanceX / 6 ;
             } else {
                 x1 += 30;
                 x2 -= 30;
@@ -171,7 +171,7 @@ export class AppComponent implements OnInit {
             y1 += 30;
             y2 += 30;
             controlX = (x1 + x2) / 2;
-            controlY = Math.min(y1, y2) + distanceX / 2 - 40;
+            controlY = Math.min(y1, y2) + distanceX / 6;
             isFeedBack = true;
         }
 
