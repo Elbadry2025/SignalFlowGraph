@@ -236,12 +236,13 @@ export class AppComponent implements OnInit {
     differentCycles: number[][][] = [[[]]];
 
     solve() {
-        // this.graph = [[0,2,4.5,0],[-7,0,0.5,6],[0,-2,0,3],[-10,0,0,0]];
+        // this.graph = [[0,5,40,0,0],[15,0,5,30,0],[0,15,0,5,25],[0,0,15,0,5],[0,0,0,15,0]];
         // this.letterToIndex.set("A",0);
         // this.letterToIndex.set("B",1);
         // this.letterToIndex.set("C",2);
         // this.letterToIndex.set("D",3);
-
+        // this.letterToIndex.set("E",4);
+        console.log(this.graph);
         this.startNode = "";
         this.endNode = "";
         this.forwardPaths = [];
